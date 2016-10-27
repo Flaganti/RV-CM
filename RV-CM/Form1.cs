@@ -126,6 +126,7 @@ namespace RV_CM
                             //razlika
                             else
                             {
+                                //boli me kurac
                                 str = str + "00";
                                 //00 - [-2,-1][1,2]
                                 if (num1[i, j] - num1[i, j - 1] >= -2 && num1[i, j] - num1[i, j - 1] <= 2)
@@ -158,10 +159,7 @@ namespace RV_CM
                             {
                                 str = str + "0";
                             }
-                            if (strin.Length > 12)
-                            {
-                                strin = strin.Remove(0, 4);
-                            }
+                            
                             str = str + strin;
                         }
                     }
@@ -173,10 +171,7 @@ namespace RV_CM
                         {
                             str = str + "0";
                         }
-                        if (strin.Length > 12)
-                        {
-                            strin = strin.Remove(0, 4);
-                        }
+                        
                         str = str + strin;
                     }
 
@@ -440,7 +435,7 @@ namespace RV_CM
                 string biti = builder.ToString();
                 MessageBox.Show("test");
                 short[] slika = decompress(biti.Remove(biti.Length-ost));
-                MessageBox.Show(biti.Remove(biti.Length - ost).Length.ToString());
+                MessageBox.Show(slika.Length.ToString());
                 SaveFileDialog save = new SaveFileDialog();
                 save.Filter = "IMG|*.img";
                 if (save.ShowDialog() == DialogResult.OK)
@@ -530,8 +525,8 @@ namespace RV_CM
                     //Branje negativnih vrednosti!!!!
                     if (bits[i + 2] == '1')
                     {
-                        string sub = bits.Substring(i + 2, 12);
-                        Int16 stevilo = Convert.ToInt16("1111"+sub, 2);
+                        string sub = bits.Substring(i + 2, 16);
+                        Int16 stevilo = Convert.ToInt16(sub, 2);
                         slika.Add(stevilo);
                         i += 16;
                     }
