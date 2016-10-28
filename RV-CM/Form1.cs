@@ -126,7 +126,6 @@ namespace RV_CM
                             //razlika
                             else
                             {
-                                //boli me kurac
                                 str = str + "00";
                                 //00 - [-2,-1][1,2]
                                 if (num1[i, j] - num1[i, j - 1] >= -2 && num1[i, j] - num1[i, j - 1] <= 2)
