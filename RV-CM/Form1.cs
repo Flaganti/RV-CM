@@ -126,6 +126,7 @@ namespace RV_CM
                             //razlika
                             else
                             {
+                                //boli me kurac
                                 str = str + "00";
                                 //00 - [-2,-1][1,2]
                                 if (num1[i, j] - num1[i, j - 1] >= -2 && num1[i, j] - num1[i, j - 1] <= 2)
@@ -153,24 +154,52 @@ namespace RV_CM
                         else
                         {
                             str = str + "10";
-                            string strin = Convert.ToString(num1[i, j], 2);
-                            for (int l = 0; l < 12 - strin.Length; l++)
+                            string strin = "";
+                            if (num1[i, j] < 0)
                             {
-                                str = str + "0";
+                                strin = Convert.ToString(num1[i, j] * (-1), 2);
+                                str += "1";
+                                for (int l = 0; l < 11 - strin.Length; l++)
+                                {
+                                    str = str + "0";
+                                }
+
                             }
-                            
+                            else
+                            {
+                                strin = Convert.ToString(num1[i, j], 2);
+                                for (int l = 0; l < 12 - strin.Length; l++)
+                                {
+                                    str = str + "0";
+                                }
+                            }
+
                             str = str + strin;
                         }
                     }
                     else
                     {
                         str = str + "10";
-                        string strin = Convert.ToString(num1[i, j], 2);
-                        for (int l = 0; l < 12 - strin.Length; l++)
+                        string strin = "";
+                        if (num1[i, j] < 0)
                         {
-                            str = str + "0";
+                            strin = Convert.ToString(num1[i, j] * (-1), 2);
+                            str += "1";
+                            for (int l = 0; l < 11 - strin.Length; l++)
+                            {
+                                str = str + "0";
+                            }
+
                         }
-                        
+                        else
+                        {
+                            strin = Convert.ToString(num1[i, j], 2);
+                            for (int l = 0; l < 12 - strin.Length; l++)
+                            {
+                                str = str + "0";
+                            }
+                        }
+
                         str = str + strin;
                     }
 
@@ -185,14 +214,14 @@ namespace RV_CM
             }
 
             int ostanek = 8 - (bit % 8);
-          //  int bajt = (bit + ostanek) / 8;
+            //  int bajt = (bit + ostanek) / 8;
             str = "";
-            for(int i = 0; i < 512; i++)
+            for (int i = 0; i < 512; i++)
             {
                 str += array[i];
             }
             MessageBox.Show(str.Length.ToString());
-            for(int i=0;i< ostanek; i++)
+            for (int i = 0; i < ostanek; i++)
             {
                 str += "0";
             }
@@ -415,16 +444,16 @@ namespace RV_CM
             if (res == DialogResult.OK)
             {
                 vsiBajti = File.ReadAllBytes(open.FileName);
-                byte[] bajtiOst =vsiBajti.Skip(1).ToArray();
+                byte[] bajtiOst = vsiBajti.Skip(1).ToArray();
                 byte ost = vsiBajti[0];
                 StringBuilder builder = new StringBuilder();
                 for (int i = 0; i < bajtiOst.Length; i++)
                 {
                     string str = Convert.ToString(bajtiOst[i], 2);
-                    
+
                     if (str.Length < 8)
                     {
-                        for(int a = 0; a < 8 - str.Length; a++)
+                        for (int a = 0; a < 8 - str.Length; a++)
                         {
                             builder.Append("0");
                         }
@@ -432,28 +461,44 @@ namespace RV_CM
                     builder.Append(str);
                 }
                 string biti = builder.ToString();
-                MessageBox.Show("test");
-                short[] slika = decompress(biti.Remove(biti.Length-ost));
+                MessageBox.Show((biti.Length - ost).ToString());
+                short[] slika = decompress(biti.Remove(biti.Length - ost));
                 MessageBox.Show(slika.Length.ToString());
                 SaveFileDialog save = new SaveFileDialog();
                 save.Filter = "IMG|*.img";
                 if (save.ShowDialog() == DialogResult.OK)
+                {
                     using (BinaryWriter writer = new BinaryWriter(File.Open(save.FileName, FileMode.Create)))
                     {
-                        for(int i=0;i<slika.Length;i++)
-                            for(int j = i; j < slika.Length; j+=Convert.ToInt32(Math.Sqrt(slika.Length)))
+                        for (int i = 0; i < 512; i++)
+                            for (int j = 0; j < 512; j++/*slika.Length; j+=Convert.ToInt32(Math.Sqrt(slika.Length))*/)
                             {
-                                writer.Write(slika[j]);
+                                writer.Write(Convert.ToInt16(slika[j * 512 + i]));
                             }
                     }
+                    /* using (FileStream fs = new FileStream(save.FileName, FileMode.OpenOrCreate, FileAccess.Write))
+                     {
+                         using (BinaryWriter bw = new BinaryWriter(fs))
+                         {
+                             // Write the number of items
+                             //bw.Write(slika.Length);
+
+                             foreach (short value in slika)
+                             {
+                                 bw.Write(Convert.ToInt16(value));
+                             }
+                         }
+                     }*/
+
+                }
             }
         }
         private short[] decompress(string bits)
         {
-            
+
             List<short> slika = new List<short>();
             int chunkSize = 2;
-            for(int i = 0; i < bits.Length; i += chunkSize)
+            for (int i = 0; i < bits.Length; i += chunkSize)
             {
                 /* if (slika.Count>0)
                  {
@@ -475,8 +520,8 @@ namespace RV_CM
                     //-2,2
                     if (bits.Substring(i + 2, 2) == "00")
                     {
-                        Int16 index= Convert.ToInt16(bits.Substring(i + 2 + 2, 2),2);
-                        short[] array = new short[] { -2,-1,1,2 };
+                        Int16 index = Convert.ToInt16(bits.Substring(i + 2 + 2, 2), 2);
+                        short[] array = new short[] { -2, -1, 1, 2 };
                         short stevilo = Convert.ToInt16(slika.Last() + array[index]);
                         slika.Add(stevilo);
                         i += 4;
@@ -484,8 +529,8 @@ namespace RV_CM
                     //-6,6
                     else if (bits.Substring(i + 2, 2) == "01")
                     {
-                        Int16 index = Convert.ToInt16(bits.Substring(i + 2 + 2, 3),2);
-                        short[] array = new short[] { -6, -5, -4, -3,3,4,5,6};
+                        Int16 index = Convert.ToInt16(bits.Substring(i + 2 + 2, 3), 2);
+                        short[] array = new short[] { -6, -5, -4, -3, 3, 4, 5, 6 };
                         short stevilo = Convert.ToInt16(slika.Last() + array[index]);
                         slika.Add(stevilo);
                         i += 5;
@@ -493,8 +538,8 @@ namespace RV_CM
                     //-14,14
                     else if (bits.Substring(i + 2, 2) == "10")
                     {
-                        Int16 index = Convert.ToInt16(bits.Substring(i + 2 + 2, 4),2);
-                        short[] array = new short[] { -14,-13,-12,-11,-10,-9,-8,-7,7,8,9,10,11,12,13,14};
+                        Int16 index = Convert.ToInt16(bits.Substring(i + 2 + 2, 4), 2);
+                        short[] array = new short[] { -14, -13, -12, -11, -10, -9, -8, -7, 7, 8, 9, 10, 11, 12, 13, 14 };
                         short stevilo = Convert.ToInt16(slika.Last() + array[index]);
                         slika.Add(stevilo);
                         i += 6;
@@ -502,7 +547,7 @@ namespace RV_CM
                     //-30,30
                     else if (bits.Substring(i + 2, 2) == "11")
                     {
-                        Int16 index = Convert.ToInt16(bits.Substring(i + 2 + 2, 5),2);
+                        Int16 index = Convert.ToInt16(bits.Substring(i + 2 + 2, 5), 2);
                         short[] array = new short[] { -30, -29, -28, -27, -26, -25, -24, -23, -22, -21, -20, -19, -18, -17, -16, -15, 15, 16, 17, 18, 19, 20, 21, 22, 23, 24, 25, 26, 27, 28, 29, 30 };
                         short stevilo = Convert.ToInt16(slika.Last() + array[index]);
                         slika.Add(stevilo);
@@ -511,23 +556,23 @@ namespace RV_CM
                 }
                 else if (chunk == "01")
                 {
-                    Int16 ponovitve = Convert.ToInt16(bits.Substring(i + 2, 6),2);
+                    Int16 ponovitve = Convert.ToInt16(bits.Substring(i + 2, 6), 2);
                     short stevilo = slika.Last();
-                    for(int a = 0; a < ponovitve; a++)
+                    for (int a = 0; a < ponovitve; a++)
                     {
                         slika.Add(stevilo);
                     }
                     i += 6;
                 }
-                else if(chunk == "10")
+                else if (chunk == "10")
                 {
                     //Branje negativnih vrednosti!!!!
                     if (bits[i + 2] == '1')
                     {
-                        string sub = bits.Substring(i + 2, 16);
+                        string sub = bits.Substring(i + 3, 11);
                         Int16 stevilo = Convert.ToInt16(sub, 2);
-                        slika.Add(stevilo);
-                        i += 16;
+                        slika.Add(Convert.ToInt16(stevilo * (-1)));
+                        i += 12;
                     }
                     else
                     {
