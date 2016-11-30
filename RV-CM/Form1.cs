@@ -22,7 +22,9 @@ namespace RV_CM
         }
         short[,] num = new short[512, 512];
         Bitmap slika = new Bitmap(512, 512);
-        private void button1_Click(object sender, EventArgs e)
+        List<short[,]> Slike = new List<short[,]>();
+        List<String> fileNames;
+        private void button1_Click(object sender, EventArgs e) //NALOŽI IMG
         {
             OpenFileDialog open = new OpenFileDialog();
             open.Filter = "Img|*.img";
@@ -52,7 +54,7 @@ namespace RV_CM
 
         }
 
-        private void button2_Click(object sender, EventArgs e)
+        private void button2_Click(object sender, EventArgs e)//NALOŽI LUT
         {
             byte[,] lut = new byte[3, 256];
             OpenFileDialog open = new OpenFileDialog();
@@ -80,7 +82,7 @@ namespace RV_CM
             }
         }
 
-        private void button3_Click(object sender, EventArgs e)
+        private void button3_Click(object sender, EventArgs e) //COMPRESIJA
         {
 
             short[,] num1 = new short[512, 512];
@@ -435,7 +437,7 @@ namespace RV_CM
                 ).ToArray();
         }
 
-        private void button4_Click(object sender, EventArgs e)
+        private void button4_Click(object sender, EventArgs e)//DEKOMPRESIJA
         {
             OpenFileDialog open = new OpenFileDialog();
             open.Filter = "CMP|*.cmp";
@@ -538,6 +540,7 @@ namespace RV_CM
                     //-14,14
                     else if (bits.Substring(i + 2, 2) == "10")
                     {
+
                         Int16 index = Convert.ToInt16(bits.Substring(i + 2 + 2, 4), 2);
                         short[] array = new short[] { -14, -13, -12, -11, -10, -9, -8, -7, 7, 8, 9, 10, 11, 12, 13, 14 };
                         short stevilo = Convert.ToInt16(slika.Last() + array[index]);
@@ -584,6 +587,59 @@ namespace RV_CM
                 }
             }
             return slika.ToArray();
+        }
+
+        private void vecSlik_Click(object sender, EventArgs e)
+        {
+            Slike.Clear();
+            listView1.Clear();
+            OpenFileDialog open = new OpenFileDialog();
+            open.Filter = "Img|*.img";
+            open.Multiselect = true;
+            DialogResult res = open.ShowDialog();
+            if (res == DialogResult.OK)
+            {            
+                fileNames = open.FileNames.ToList();
+                foreach(String a in open.SafeFileNames)
+                {
+                    listView1.Items.Add(a);
+                }
+                for (int k = 0; k < fileNames.Count; k++)
+                {
+                    BinaryReader br1 = new BinaryReader(File.Open(fileNames[k], FileMode.Open));
+                    short[,] numV = new short[512, 512];
+                    for (int i = 0; i < 512; i++)
+                        for (int j = 0; j < 512; j++)
+                        {
+                            numV[j, i] = (short)br1.ReadInt16();
+                        }
+                    Slike.Add(numV);
+                    br1.Close();
+                }
+            }
+            pictureBox1.Image = vrnislika(Slike[0]);
+        }
+        private Bitmap vrnislika(short[,] numV)
+        {
+            Bitmap slika1 = new Bitmap(512, 512);
+            for (int i = 0; i < 512; i++)
+                for (int j = 0; j < 512; j++)
+                {
+                    double a = numV[i, j] + 2048;
+                    a = a / 4096;
+                    int c = Convert.ToInt32(a * 255);
+                    Color col = Color.FromArgb(c, c, c);
+                    slika1.SetPixel(i, j, col);
+
+                }
+            return slika1;
+        }
+
+
+        private void listView1_Click(object sender, EventArgs e)
+        {
+            int index = (sender as ListView).SelectedItems[0].Index;
+            pictureBox1.Image = vrnislika(Slike.ElementAt(index));
         }
     }
 }
