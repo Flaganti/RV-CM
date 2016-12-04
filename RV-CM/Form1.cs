@@ -657,15 +657,10 @@ namespace RV_CM
             {
                 imena_vec.Add(Convert.ToByte(ime.Substring(0, ime.Length - 4)));
             }
-            //short[,] test  = new short[2, 16] { { -2048, -2048, -2048, -2048, -2048, -2048, -2048, -2048, -2048, -2048, 2047, 2047, 2047,    1, 1775, -2048 }, { -2048, -2048, -2048, -2048, -2048, -2047, -2047, 1775, -1775, -2048, 2047, 2047, -2048, -2048, -2048, -2048 } };
-            //short[,] test1 = new short[2, 16] { { -2048, -2048, -2048, -2048, -2048, -2047, -2047,  1775, -1775, -2048, 2047, 2047,-2048,-2048,-2048, -2048 }, { -2048, -2048, -2048, -2048, -2048, -2048, -2048, -2048, -2048, -2048, 2047, 2047, 2047, 1, 1775, -2048 } };
             kompresirano.Add(kompresirana_slika1(Slike[0]));
-            //kompresirano.Add(kompresirana_slika1(test));
             for (int i = 1; i < Slike.Count; i++)
             {
-            //short[,] Dk = odstej(Slike[i], Slike[i - 1]);
                 kompresirano.Add(kompresirana_slika2(Slike[i], Slike[i-1]));
-            //kompresirano.Add(kompresirana_slika2(test1, test));
             }
             zapis.Add(Convert.ToByte(8 - (kompresirano.Sum(x => x.Length) % 8)));//izračunaj dolžino vseh stringov ter izračunaj ostanek
             zapis.Add(Convert.ToByte(imena_vec.Count));
@@ -686,18 +681,7 @@ namespace RV_CM
                     }
                 }
             }
-        }
-        private short[,] odstej(short[,] a, short[,] b)
-        {
-            short[,] odstej = new short[512, 512];
-            for (int i = 0; i < 512; i++)
-            {
-                for (int j = 0; j < 512; j++)
-                {
-                    odstej[i, j] = Convert.ToInt16(a[i, j] - b[i, j]);
-                }
-            }
-            return odstej;
+            MessageBox.Show("Kompresijsko razmerje:  1:"+((double)(512 * imena_vec.Count() * 1024) / (double)zapis.Count()).ToString());
         }
         private String kompresirana_slika1(short[,] num1)
         {
@@ -866,23 +850,23 @@ namespace RV_CM
                         builder.Append("01");
                         builder.Append(Convert.ToString(j, 2).PadLeft(6, '0'));
                     }
-                    else if(((Mk[i] - Mk1[i]) >=-30 && (Mk[i] - Mk1[i]) < 0)|| ((Mk[i] - Mk1[i]) <= 30 && (Mk[i] - Mk1[i]) > 0))
+                    else if(((Mk[i] - Mk1[i]) >=-30 && (Mk[i] - Mk1[i]) < 0) || ((Mk[i] - Mk1[i]) <= 30 && (Mk[i] - Mk1[i]) > 0))
                     {
                         builder.Append("00");
-                        if(((Mk[i] - Mk1[i]) >= -2 && (Mk[i] - Mk1[i]) < 2))
+                        if(((Mk[i] - Mk1[i]) >= -2 && (Mk[i] - Mk1[i]) <= 2))
                         {
                             builder.Append("00");
                         }
-                        else if (((Mk[i] - Mk1[i]) >= -6 && (Mk[i] - Mk1[i]) < 6))
+                        else if (((Mk[i] - Mk1[i]) >= -6 && (Mk[i] - Mk1[i]) <= 6))
                         {
                             builder.Append("01");
                         }
-                        else if (((Mk[i] - Mk1[i]) >= -14 && (Mk[i] - Mk1[i]) < 14))
+                        else if (((Mk[i] - Mk1[i]) >= -14 && (Mk[i] - Mk1[i]) <= 14))
                         {
                             builder.Append("10");
 
                         }
-                        else if (((Mk[i] - Mk1[i]) >= -30 && (Mk[i] - Mk1[i]) < 30))
+                        else if (((Mk[i] - Mk1[i]) >= -30 && (Mk[i] - Mk1[i]) <= 30))
                         {
                             builder.Append("11");
                         }
@@ -1092,7 +1076,7 @@ namespace RV_CM
                     {
                         slika.Count();
                     }
-                    if (slika.Count == 512)
+                    if (slika.Count == 262144)
                     {
                         shorti.Add(slika.ToArray());
                         slika.Clear();
@@ -1165,7 +1149,7 @@ namespace RV_CM
                             Int16 index = Convert.ToInt16(bits.Substring(i + 2 + 2, 4), 2);
                             if (index >= 16 / 2) x = (short)(-(16 - 1) + 38 + index);
                             else x = (short)(-38 + index);
-                            slika.Add((short)(x+ (shorti.Last().ElementAt(slika.Count()))));
+                            slika.Add((short)(x + (shorti.Last().ElementAt(slika.Count()))));
                             i += 6;
                         }
                         else if (bits.Substring(i + 2, 2) == "01")
@@ -1173,7 +1157,7 @@ namespace RV_CM
                             Int16 index = Convert.ToInt16(bits.Substring(i + 2 + 2, 6), 2);
                             if (index >= 64 / 2) x = (short)(-(64 - 1) + 70 + index);
                             else x = (short)(-70 + index);
-                            slika.Add((short)(x+ (shorti.Last().ElementAt(slika.Count()))));
+                            slika.Add((short)(x + (shorti.Last().ElementAt(slika.Count()))));
                             i += 8;
                         }
                         else if (bits.Substring(i + 2, 2) == "10")
@@ -1181,7 +1165,7 @@ namespace RV_CM
                             Int16 index = Convert.ToInt16(bits.Substring(i + 2 + 2, 9), 2);
                             if (index >= 512 / 2) x = (short)(-(512 - 1) + 326 + index);
                             else x = (short)(-326 + index);
-                            slika.Add((short)(x+ (shorti.Last().ElementAt(slika.Count()))));
+                            slika.Add((short)(x + (shorti.Last().ElementAt(slika.Count()))));
                             i += 11;
                         }
                         else if (bits.Substring(i + 2, 2) == "11")
@@ -1189,15 +1173,10 @@ namespace RV_CM
                             Int16 index = Convert.ToInt16(bits.Substring(i + 2 + 2, 13), 2);
                             if (index >= 7538 / 2) x = (short)(-(7538 - 1) + 4095 + index);
                             else x = (short)(-4095 + index);
-                            slika.Add((short)(x+ (shorti.Last().ElementAt(slika.Count()))));
+                            slika.Add((short)(x + (shorti.Last().ElementAt(slika.Count()))));
                             i += 15;
                         }
-                        if (slika.Count == 14073)
-                        {
-                            i = i;
-                        }
                     }
-                    
                     if (slika.Count == 262144)
                     {
                         shorti.Add(slika.ToArray());
@@ -1208,91 +1187,5 @@ namespace RV_CM
             }
             return shorti;
         }
-        private short[] pristej(short[] a, short[] b) //a = slika odstete, b = original
-        {
-            short[] odstej = new short[512*512];
-            for (int i = 0; i < 512*512; i++)
-            {
-                
-                    odstej[i] = Convert.ToInt16(a[i] + b[i]);
-                
-            }
-            return odstej;
-        }
     }
 }
-/*else // ABSOLUTNO!
-                        {
-                            str = str + "10";
-                            short stevilo;
-                            if (num[i, j] > 4095)
-                                stevilo=1;
-                            if (Convert.ToInt32(num1[i, j]) >= -38 && Convert.ToInt32(num1[i, j]) <= 38) //16 stevil
-                            {
-                                str += "00";
-                                if (num1[i, j] > 0)
-                                {
-                                    stevilo = (short)(15 - (38 - num1[i, j])); // if(stevilo >= 16/2) x = -(16-1) + 38 + stevilo 
-                                }
-                                else
-                                {
-                                    stevilo = (short)(num1[i, j] + 38); // za dekodiranje if( stevilo < 16/2 ) x = -38 + stevilo
-                                }
-                                if (stevilo > 15)
-                                    stevilo = stevilo;
-                                string strin = Convert.ToString(stevilo, 2).PadLeft(4, '0');
-                                str += strin;
-                            }
-                            else if (Convert.ToInt32(num1[i, j]) >= -70 && Convert.ToInt32(num1[i, j]) <= 70) //64 stevil
-                            {
-                                str += "01";
-                                if (num1[i, j] > 0)
-                                {
-                                    stevilo = (short)(63 - (70 - num1[i, j])); // if(stevilo >= 64/2) x = -(64-1) + 70 + stevilo 
-                                }
-                                else
-                                {
-                                    stevilo = (short)(num1[i, j] + 70); // za dekodiranje if( stevilo < 64/2 ) x = -70 + stevilo
-                                }
-                                if (stevilo > 63)
-                                    stevilo = stevilo;
-                                string strin = Convert.ToString(stevilo, 2).PadLeft(6, '0');
-                                str += strin;
-
-                            }
-                            else if (Convert.ToInt32(num1[i, j]) >= -326 && Convert.ToInt32(num1[i, j]) <= 326) //512 stevil
-                            {
-                                str += "10";
-                                if (num1[i, j] > 0)
-                                {
-                                    stevilo = (short)(511 - (326 - num1[i, j])); // if(stevilo >= 512/2) x = -(512-1) + 326 + stevilo 
-                                }
-                                else
-                                {
-                                    stevilo = (short)(num1[i, j] + 326); // za dekodiranje if( stevilo < 512/2 ) x = -326 + stevilo
-                                }
-                                if (stevilo > 511)
-                                    stevilo = stevilo;
-                                string strin = Convert.ToString(stevilo, 2).PadLeft(9, '0');
-                                str += strin;
-                            }
-                            else if (Convert.ToInt32(num1[i, j]) >= -4095 && Convert.ToInt32(num1[i, j]) <= 4095) //7538 stevil
-                            {
-                                str += "11";
-                                if (num1[i, j] > 0)
-                                {
-                                    stevilo = (short)(7537 - (4095 - num1[i, j])); // if(stevilo >= 7538/2) x = -(7538-1) + 4095 + stevilo 
-                                }
-                                else
-                                {
-                                    stevilo = (short)(num1[i, j] + 4095); // za dekodiranje if( stevilo < 7538/2 ) x = -4095 + stevilo
-                                }
-                                if (stevilo > 7537)
-                                    stevilo = stevilo;
-                                string strin = Convert.ToString(stevilo, 2).PadLeft(13, '0');
-                                str += strin;
-
-                            }
-
-                        }
-*/
